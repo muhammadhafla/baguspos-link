@@ -1,0 +1,1 @@
+# POS Pricing Rule Days DocType

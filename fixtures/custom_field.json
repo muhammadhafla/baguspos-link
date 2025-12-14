@@ -1,0 +1,83 @@
+[
+  {
+    "dt": "Sales Invoice",
+    "fieldname": "pos_branch_id",
+    "fieldtype": "Data",
+    "label": "POS Branch ID",
+    "description": "Original POS branch identifier"
+  },
+  {
+    "dt": "Sales Invoice",
+    "fieldname": "pos_device_id",
+    "fieldtype": "Data",
+    "label": "POS Device ID",
+    "description": "Source POS device identifier"
+  },
+  {
+    "dt": "Sales Invoice",
+    "fieldname": "pos_transaction_id",
+    "fieldtype": "Data",
+    "label": "POS Transaction ID",
+    "unique": 1,
+    "description": "Unique POS transaction identifier"
+  },
+  {
+    "dt": "Sales Invoice",
+    "fieldname": "pos_receipt_number",
+    "fieldtype": "Data",
+    "label": "POS Receipt Number",
+    "description": "POS-generated receipt number"
+  },
+  {
+    "dt": "Sales Invoice",
+    "fieldname": "pos_sync_status",
+    "fieldtype": "Select",
+    "options": "Pending\nSynced\nFailed\nManual Review",
+    "default": "Pending",
+    "label": "POS Sync Status"
+  },
+  {
+    "dt": "Sales Invoice",
+    "fieldname": "pos_sync_attempts",
+    "fieldtype": "Int",
+    "default": 0,
+    "label": "POS Sync Attempts"
+  },
+  {
+    "dt": "Sales Invoice",
+    "fieldname": "pos_last_sync_attempt",
+    "fieldtype": "Datetime",
+    "label": "POS Last Sync Attempt"
+  },
+  {
+    "dt": "Item",
+    "fieldname": "is_pos_item",
+    "fieldtype": "Check",
+    "default": 1,
+    "label": "Is POS Item",
+    "description": "Item available for POS transactions"
+  },
+  {
+    "dt": "Item",
+    "fieldname": "pos_display_order",
+    "fieldtype": "Int",
+    "label": "POS Display Order",
+    "description": "Order for display in POS interface"
+  },
+  {
+    "dt": "Item",
+    "fieldname": "pos_category",
+    "fieldtype": "Link",
+    "options": "Item Group",
+    "label": "POS Category",
+    "description": "Item group for POS categorization"
+  },
+  {
+    "dt": "POS Pricing Rule",
+    "fieldname": "erpnext_priority",
+    "fieldtype": "Int",
+    "label": "ERPNext Priority",
+    "hidden": 1,
+    "description": "Priority mapped to ERPNext pricing rule system"
+  }
+]

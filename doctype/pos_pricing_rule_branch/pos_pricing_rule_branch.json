@@ -1,0 +1,55 @@
+{
+ "actions": [],
+ "creation": "2025-12-01 07:33:00.000000",
+ "custom": 0,
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "fields": [
+  {
+   "fieldname": "branch_id",
+   "fieldtype": "Data",
+   "label": "Branch ID",
+   "reqd": 1,
+   "description": "Unique branch identifier"
+  },
+  {
+   "fieldname": "branch_name",
+   "fieldtype": "Data",
+   "label": "Branch Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "branch_type",
+   "fieldtype": "Select",
+   "label": "Branch Type",
+   "options": "Main Branch\nSub Branch\nFranchise\nKiosk",
+   "default": "Main Branch"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "Location"
+  },
+  {
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active",
+   "default": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-01 07:33:00.000000",
+ "modified_by": "Administrator",
+ "module": "POS Pricing Rule",
+ "name": "POS Pricing Rule Branch",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

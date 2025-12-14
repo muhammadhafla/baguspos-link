@@ -1,0 +1,200 @@
+{
+ "actions": [],
+ "allow_events_in_timeline": 1,
+ "allow_guest_to_view": 1,
+ "allow_rename": 1,
+ "autoname": "field:device_id",
+ "creation": "2025-12-01 06:30:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "basic_info",
+  "device_id",
+  "device_name",
+  "branch",
+  "company",
+  "registration_info",
+  "registration_code",
+  "is_registered",
+  "api_credentials",
+  "api_key",
+  "api_secret",
+  "sync_info",
+  "last_sync_at",
+  "sync_status",
+  "last_heartbeat",
+  "device_info_section",
+  "device_type",
+  "os_version",
+  "app_version",
+  "device_fingerprint"
+ ],
+ "fields": [
+  {
+   "fieldname": "basic_info",
+   "fieldtype": "Section Break",
+   "label": "Basic Information"
+  },
+  {
+   "fieldname": "device_id",
+   "fieldtype": "Data",
+   "label": "Device ID",
+   "reqd": 1,
+   "unique": 1,
+   "description": "Unique identifier for the POS device"
+  },
+  {
+   "fieldname": "device_name",
+   "fieldtype": "Data",
+   "label": "Device Name",
+   "reqd": 1,
+   "description": "Human-readable device name"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "registration_info",
+   "fieldtype": "Section Break",
+   "label": "Registration Information"
+  },
+  {
+   "fieldname": "registration_code",
+   "fieldtype": "Data",
+   "label": "Registration Code",
+   "description": "One-time registration code for device setup"
+  },
+  {
+   "fieldname": "is_registered",
+   "fieldtype": "Check",
+   "label": "Is Registered",
+   "default": "0"
+  },
+  {
+   "fieldname": "api_credentials",
+   "fieldtype": "Section Break",
+   "label": "API Credentials"
+  },
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Data",
+   "label": "API Key",
+   "read_only": 1,
+   "description": "Generated API key for device authentication"
+  },
+  {
+   "fieldname": "api_secret",
+   "fieldtype": "Data",
+   "label": "API Secret",
+   "read_only": 1,
+   "description": "Generated API secret for device authentication"
+  },
+  {
+   "fieldname": "sync_info",
+   "fieldtype": "Section Break",
+   "label": "Sync Information"
+  },
+  {
+   "fieldname": "last_sync_at",
+   "fieldtype": "Datetime",
+   "label": "Last Sync At"
+  },
+  {
+   "fieldname": "sync_status",
+   "fieldtype": "Select",
+   "label": "Sync Status",
+   "options": "Online\nOffline\nSyncing\nError",
+   "default": "Offline"
+  },
+  {
+   "fieldname": "last_heartbeat",
+   "fieldtype": "Datetime",
+   "label": "Last Heartbeat"
+  },
+  {
+   "fieldname": "device_info_section",
+   "fieldtype": "Section Break",
+   "label": "Device Information"
+  },
+  {
+   "fieldname": "device_type",
+   "fieldtype": "Select",
+   "label": "Device Type",
+   "options": "Tablet\nDesktop\nMobile\nKiosk"
+  },
+  {
+   "fieldname": "os_version",
+   "fieldtype": "Data",
+   "label": "OS Version"
+  },
+  {
+   "fieldname": "app_version",
+   "fieldtype": "Data",
+   "label": "App Version"
+  },
+  {
+   "fieldname": "device_fingerprint",
+   "fieldtype": "Text",
+   "label": "Device Fingerprint",
+   "description": "Device fingerprint for additional security validation"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-01 06:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "POS Integration",
+ "name": "POS Device",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "ERPNext Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "ERPNext User",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
+}

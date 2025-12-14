@@ -1,0 +1,156 @@
+{
+ "actions": [],
+ "allow_events_in_timeline": 1,
+ "allow_guest_to_view": 1,
+ "allow_rename": 1,
+ "creation": "2025-12-01 06:35:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sync_details",
+  "device",
+  "sync_type",
+  "sync_status",
+  "timing",
+  "start_time",
+  "end_time",
+  "duration",
+  "performance",
+  "items_synced",
+  "transactions_synced",
+  "conflicts_detected",
+  "error_details",
+  "sync_data"
+ ],
+ "fields": [
+  {
+   "fieldname": "sync_details",
+   "fieldtype": "Section Break",
+   "label": "Sync Details"
+  },
+  {
+   "fieldname": "device",
+   "fieldtype": "Link",
+   "label": "POS Device",
+   "options": "POS Device"
+  },
+  {
+   "fieldname": "sync_type",
+   "fieldtype": "Select",
+   "label": "Sync Type",
+   "options": "Master Data\nTransaction\nFull Sync\nManual Sync\nAPI Request\nHealth Check",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sync_status",
+   "fieldtype": "Select",
+   "label": "Sync Status",
+   "options": "Started\nIn Progress\nCompleted\nFailed\nCancelled",
+   "default": "Started"
+  },
+  {
+   "fieldname": "timing",
+   "fieldtype": "Section Break",
+   "label": "Timing"
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Datetime",
+   "label": "Start Time",
+   "default": "now"
+  },
+  {
+   "fieldname": "end_time",
+   "fieldtype": "Datetime",
+   "label": "End Time"
+  },
+  {
+   "fieldname": "duration",
+   "fieldtype": "Duration",
+   "label": "Duration",
+   "read_only": 1
+  },
+  {
+   "fieldname": "performance",
+   "fieldtype": "Section Break",
+   "label": "Performance Metrics"
+  },
+  {
+   "fieldname": "items_synced",
+   "fieldtype": "Int",
+   "label": "Items Synced",
+   "default": "0"
+  },
+  {
+   "fieldname": "transactions_synced",
+   "fieldtype": "Int",
+   "label": "Transactions Synced",
+   "default": "0"
+  },
+  {
+   "fieldname": "conflicts_detected",
+   "fieldtype": "Int",
+   "label": "Conflicts Detected",
+   "default": "0"
+  },
+  {
+   "fieldname": "error_details",
+   "fieldtype": "Text",
+   "label": "Error Details"
+  },
+  {
+   "fieldname": "sync_data",
+   "fieldtype": "JSON",
+   "label": "Sync Data",
+   "description": "Additional sync metadata in JSON format"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-01 06:35:00.000000",
+ "modified_by": "Administrator",
+ "module": "POS Integration",
+ "name": "POS Sync Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "ERPNext Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "ERPNext User",
+   "share": 1
+  }
+ ],
+ "sort_field": "start_time",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
+}
