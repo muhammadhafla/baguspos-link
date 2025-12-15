@@ -1,0 +1,1 @@
+# ERPNext POS Integration Installation Module

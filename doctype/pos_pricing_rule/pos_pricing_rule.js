@@ -1,288 +1,238 @@
-// Copyright (c) 2025, Muhammad Hafla and contributors
-// For license information, please see license.txt
+// Enhanced Pricing Rule Management Interface for POS Pricing Rule
 
 frappe.ui.form.on('POS Pricing Rule', {
-    setup: function(frm) {
-        // Set up calculations and validations
-        frm.add_fetch('item_code', 'item_name', 'item_name');
-        frm.add_fetch('customer', 'customer_name', 'customer_name');
-        
-        // Set up pricing type specific fields
-        frm.set_df_property('base_price', 'hidden', frm.doc.pricing_type !== 'Base Price' && 
-                           frm.doc.pricing_type !== 'Branch Override' && 
-                           frm.doc.pricing_type !== 'Customer Price' &&
-                           frm.doc.pricing_type !== 'Manual Override');
-                           
-        frm.set_df_property('discount_percentage', 'hidden', !['Time-based', 'Quantity Break', 'Spend Discount', 'Manual Override'].includes(frm.doc.pricing_type));
-        frm.set_df_property('discount_amount', 'hidden', !['Time-based', 'Quantity Break', 'Spend Discount', 'Manual Override'].includes(frm.doc.pricing_type));
-        
-        frm.set_df_property('min_quantity', 'hidden', frm.doc.pricing_type !== 'Quantity Break');
-        frm.set_df_property('max_quantity', 'hidden', frm.doc.pricing_type !== 'Quantity Break');
-        
-        frm.set_df_property('min_spend_amount', 'hidden', frm.doc.pricing_type !== 'Spend Discount');
-        
-        frm.set_df_property('bxgy_buy_qty', 'hidden', frm.doc.pricing_type !== 'BXGY');
-        frm.set_df_property('bxgy_get_qty', 'hidden', frm.doc.pricing_type !== 'BXGY');
-        
-        // Time validation
-        if (frm.doc.from_time && frm.doc.to_time) {
-            const fromTime = new Date('1970-01-01 ' + frm.doc.from_time);
-            const toTime = new Date('1970-01-01 ' + frm.doc.to_time);
-            
-            if (fromTime >= toTime) {
-                frm.set_df_property('to_time', 'reqd', 1);
-                frappe.msgprint(__('To Time must be after From Time'));
-            }
-        }
-    },
-    
     refresh: function(frm) {
         // Add custom buttons
         if (!frm.is_new()) {
-            frm.add_custom_button(__('Test Pricing'), function() {
-                test_pricing_rule(frm);
+            frm.add_custom_button(__('Test Rule'), function() {
+                testPricingRule(frm);
             });
             
-            frm.add_custom_button(__('Apply to Items'), function() {
-                apply_to_items(frm);
+            frm.add_custom_button(__('Preview Calculations'), function() {
+                previewCalculations(frm);
+            });
+            
+            frm.add_custom_button(__('View Performance'), function() {
+                viewRulePerformance(frm);
             });
         }
         
-        // Show priority mapping info
-        if (frm.doc.priority_level) {
-            const priority_info = get_priority_mapping()[frm.doc.priority_level];
-            if (priority_info) {
-                frm.set_intro(__('ERPNext Priority: {0}', [priority_info.erpnext_priority]), 'blue');
-                frm.set_intro(__('Description: {0}', [priority_info.description]), 'grey');
-            }
-        }
-    },
-    
-    pricing_type: function(frm) {
-        // Show/hide fields based on pricing type
-        update_field_visibility(frm);
+        // Add priority indicator
+        updatePriorityIndicator(frm);
         
-        // Set default values based on pricing type
-        set_pricing_type_defaults(frm);
+        // Setup rule validation
+        setupRuleValidation(frm);
     },
     
-    priority_level: function(frm) {
-        // Update priority info display
-        frm.refresh_intro();
+    rule_type: function(frm) {
+        updateRuleTypeFields(frm);
     },
     
-    from_time: function(frm) {
-        validate_time_range(frm);
+    priority: function(frm) {
+        updatePriorityIndicator(frm);
     },
     
-    to_time: function(frm) {
-        validate_time_range(frm);
+    disabled: function(frm) {
+        updateDisabledIndicator(frm);
     },
     
-    valid_from: function(frm) {
-        validate_date_range(frm);
+    onload: function(frm) {
+        // Load performance metrics
+        loadPerformanceMetrics(frm);
     },
     
-    valid_upto: function(frm) {
-        validate_date_range(frm);
+    validate: function(frm) {
+        validatePricingRule(frm);
     }
 });
 
-function update_field_visibility(frm) {
-    const pricing_type = frm.doc.pricing_type;
-    
-    // Reset all field visibility
-    frm.set_df_property('base_price', 'hidden', !['Base Price', 'Branch Override', 'Customer Price', 'Manual Override'].includes(pricing_type));
-    frm.set_df_property('discount_percentage', 'hidden', !['Time-based', 'Quantity Break', 'Spend Discount', 'Manual Override'].includes(pricing_type));
-    frm.set_df_property('discount_amount', 'hidden', !['Time-based', 'Quantity Break', 'Spend Discount', 'Manual Override'].includes(pricing_type));
-    frm.set_df_property('min_quantity', 'hidden', pricing_type !== 'Quantity Break');
-    frm.set_df_property('max_quantity', 'hidden', pricing_type !== 'Quantity Break');
-    frm.set_df_property('min_spend_amount', 'hidden', pricing_type !== 'Spend Discount');
-    frm.set_df_property('bxgy_buy_qty', 'hidden', pricing_type !== 'BXGY');
-    frm.set_df_property('bxgy_get_qty', 'hidden', pricing_type !== 'BXGY');
-    frm.set_df_property('days_of_week', 'hidden', !['Time-based'].includes(pricing_type));
-    frm.set_df_property('from_time', 'hidden', !['Time-based'].includes(pricing_type));
-    frm.set_df_property('to_time', 'hidden', !['Time-based'].includes(pricing_type));
-    
-    frm.refresh_fields();
-}
-
-function set_pricing_type_defaults(frm) {
-    const pricing_type = frm.doc.pricing_type;
-    
-    // Clear fields that shouldn't have values for this pricing type
-    if (pricing_type === 'Base Price') {
-        frm.set_value('discount_percentage', '');
-        frm.set_value('discount_amount', '');
-        frm.set_value('min_quantity', '');
-        frm.set_value('max_quantity', '');
-        frm.set_value('min_spend_amount', '');
-        frm.set_value('bxgy_buy_qty', '');
-        frm.set_value('bxgy_get_qty', '');
-    } else if (pricing_type === 'BXGY') {
-        frm.set_value('base_price', '');
-        frm.set_value('discount_percentage', '');
-        frm.set_value('discount_amount', '');
-    } else if (pricing_type === 'Quantity Break') {
-        frm.set_value('base_price', '');
-        frm.set_value('bxgy_buy_qty', '');
-        frm.set_value('bxgy_get_qty', '');
-    } else if (pricing_type === 'Spend Discount') {
-        frm.set_value('base_price', '');
-        frm.set_value('min_quantity', '');
-        frm.set_value('max_quantity', '');
-        frm.set_value('bxgy_buy_qty', '');
-        frm.set_value('bxgy_get_qty', '');
-    }
-}
-
-function validate_time_range(frm) {
-    if (frm.doc.from_time && frm.doc.to_time) {
-        const fromTime = new Date('1970-01-01 ' + frm.doc.from_time);
-        const toTime = new Date('1970-01-01 ' + frm.doc.to_time);
-        
-        if (fromTime >= toTime) {
-            frappe.msgprint({
-                title: __('Invalid Time Range'),
-                message: __('To Time must be after From Time'),
-                indicator: 'red'
-            });
-            frm.set_value('to_time', '');
-        }
-    }
-}
-
-function validate_date_range(frm) {
-    if (frm.doc.valid_from && frm.doc.valid_upto) {
-        if (new Date(frm.doc.valid_from) >= new Date(frm.doc.valid_upto)) {
-            frappe.msgprint({
-                title: __('Invalid Date Range'),
-                message: __('Valid Upto must be after Valid From'),
-                indicator: 'red'
-            });
-            frm.set_value('valid_upto', '');
-        }
-    }
-}
-
-function get_priority_mapping() {
-    return {
-        '1': { erpnext_priority: 20, description: 'Base Item Price' },
-        '2': { erpnext_priority: 19, description: 'Branch Price Override' },
-        '3': { erpnext_priority: 18, description: 'Member/Customer Price' },
-        '4': { erpnext_priority: 17, description: 'Time-based Promotion' },
-        '5': { erpnext_priority: 16, description: 'Quantity Break Discount' },
-        '6': { erpnext_priority: 15, description: 'Spend X Discount' },
-        '7': { erpnext_priority: 14, description: 'Buy X Get Y (BXGY)' },
-        '8': { erpnext_priority: 13, description: 'Manual Override' }
+function testPricingRule(frm) {
+    const test_data = {
+        item_code: frm.doc.test_item_code || '',
+        customer: frm.doc.test_customer || '',
+        quantity: frm.doc.test_quantity || 1,
+        rule_name: frm.doc.name
     };
-}
-
-function test_pricing_rule(frm) {
-    const dialog = new frappe.ui.Dialog({
-        title: __('Test Pricing Rule'),
-        fields: [
-            {
-                fieldname: 'base_price',
-                fieldtype: 'Currency',
-                label: __('Base Price'),
-                reqd: 1
-            },
-            {
-                fieldname: 'quantity',
-                fieldtype: 'Float',
-                label: __('Quantity'),
-                default: 1
-            },
-            {
-                fieldname: 'total_amount',
-                fieldtype: 'Currency',
-                label: __('Total Amount')
-            },
-            {
-                fieldname: 'item_code',
-                fieldtype: 'Link',
-                label: __('Item Code'),
-                options: 'Item'
-            },
-            {
-                fieldname: 'branch_id',
-                fieldtype: 'Data',
-                label: __('Branch ID')
-            },
-            {
-                fieldname: 'customer',
-                fieldtype: 'Link',
-                label: __('Customer'),
-                options: 'Customer'
+    
+    frappe.call({
+        method: 'api.pricing_api.test_pricing_rule',
+        args: test_data,
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                const result = r.message.result;
+                frappe.msgprint({
+                    title: __('Pricing Rule Test'),
+                    message: __('Original Price: ') + result.original_price + 
+                             '<br>' + __('Final Price: ') + result.final_price +
+                             '<br>' + __('Discount: ') + result.discount_applied +
+                             '<br>' + __('Rule Applied: ') + result.rule_applied,
+                    indicator: 'green'
+                });
+            } else {
+                frappe.show_alert({
+                    message: 'Test failed: ' + (r.message ? r.message.error : 'Unknown error'),
+                    indicator: 'red'
+                });
             }
-        ],
-        primary_action: function() {
-            const values = dialog.get_values();
-            frappe.call({
-                method: 'erpnext_pos_integration.doctype.pos_pricing_rule.pos_pricing_rule.calculate_final_price',
-                args: {
-                    item_code: values.item_code,
-                    base_price: values.base_price,
-                    branch_id: values.branch_id,
-                    customer: values.customer,
-                    quantity: values.quantity,
-                    total_amount: values.total_amount
-                },
-                callback: function(r) {
-                    if (r.message) {
-                        const result = r.message;
-                        frappe.msgprint({
-                            title: __('Pricing Test Result'),
-                            message: `
-                                <b>Original Price:</b> ${format_currency(result.original_price)}<br>
-                                <b>Final Price:</b> ${format_currency(result.final_price)}<br>
-                                <b>Discount:</b> ${format_currency(result.discount_amount)} (${result.discount_percentage}%)<br>
-                                <b>Rule Applied:</b> ${result.rule_applied || 'None'}
-                            `,
-                            indicator: result.final_price < result.original_price ? 'green' : 'blue'
-                        });
-                    }
-                }
-            });
         }
     });
-    
-    dialog.show();
 }
 
-function apply_to_items(frm) {
-    frappe.prompt([
-        {
-            fieldname: 'item_group',
-            fieldtype: 'Link',
-            label: __('Item Group'),
-            options: 'Item Group'
+function previewCalculations(frm) {
+    frappe.call({
+        method: 'api.pricing_api.preview_calculations',
+        args: {
+            rule_name: frm.doc.name,
+            limit: 10
         },
-        {
-            fieldname: 'brand',
-            fieldtype: 'Link',
-            label: __('Brand'),
-            options: 'Brand'
-        }
-    ], function(values) {
-        frappe.call({
-            method: 'erpnext_pos_integration.doctype.pos_pricing_rule.pos_pricing_rule.apply_pricing_rule_to_items',
-            args: {
-                pricing_rule: frm.doc.name,
-                item_group: values.item_group,
-                brand: values.brand
-            },
-            callback: function(r) {
-                if (r.message) {
-                    frappe.msgprint(__('Pricing rule applied to {0} items', [r.message]));
-                }
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                const calculations = r.message.calculations;
+                let html = '<table class="table table-striped"><thead><tr>' +
+                    '<th>Item Code</th><th>Customer</th><th>Original Price</th>' +
+                    '<th>Final Price</th><th>Discount</th><th>Date</th></tr></thead><tbody>';
+                
+                calculations.forEach(calc => {
+                    html += '<tr><td>' + calc.item_code + '</td>' +
+                           '<td>' + (calc.customer || 'N/A') + '</td>' +
+                           '<td>' + calc.original_price + '</td>' +
+                           '<td>' + calc.final_price + '</td>' +
+                           '<td>' + calc.discount_applied + '</td>' +
+                           '<td>' + frappe.datetime.str_to_user(calc.creation) + '</td></tr>';
+                });
+                
+                html += '</tbody></table>';
+                
+                frappe.msgprint({
+                    title: __('Recent Calculations'),
+                    message: html,
+                    wide: true
+                });
             }
-        });
-    }, __('Apply to Items'), __('Apply'));
+        }
+    });
 }
 
-// Utility function to format currency
-function format_currency(amount) {
-    return '₹' + (amount || 0).toFixed(2);
+function viewRulePerformance(frm) {
+    frappe.call({
+        method: 'api.pricing_api.get_rule_performance',
+        args: {
+            rule_name: frm.doc.name
+        },
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                const perf = r.message.performance;
+                const html = '<div class="row">' +
+                    '<div class="col-md-6"><h5>Performance Metrics</h5>' +
+                    '<p>Total Calculations: ' + perf.total_calculations + '</p>' +
+                    '<p>Success Rate: ' + perf.success_rate.toFixed(2) + '%</p>' +
+                    '<p>Average Discount: ' + perf.avg_discount.toFixed(2) + '</p></div>' +
+                    '<div class="col-md-6"><h5>Recent Activity</h5>' +
+                    '<p>Last Calculation: ' + (perf.last_calculation ? 
+                        frappe.datetime.str_to_user(perf.last_calculation) : 'Never') + '</p>' +
+                    '<p>Total Revenue Impact: ' + perf.revenue_impact.toFixed(2) + '</p></div>' +
+                    '</div>';
+                
+                frappe.msgprint({
+                    title: __('Rule Performance'),
+                    message: html
+                });
+            }
+        }
+    });
+}
+
+function updatePriorityIndicator(frm) {
+    const priority = frm.doc.priority;
+    let indicator_color = 'blue';
+    
+    if (priority <= 1) {
+        indicator_color = 'red';
+    } else if (priority <= 3) {
+        indicator_color = 'orange';
+    } else if (priority <= 5) {
+        indicator_color = 'green';
+    } else {
+        indicator_color = 'blue';
+    }
+    
+    // Update priority field appearance
+    frm.fields_dict.priority.$wrapper.find('.control-input').css({
+        'border-color': indicator_color,
+        'box-shadow': '0 0 5px ' + indicator_color + '40'
+    });
+}
+
+function updateRuleTypeFields(frm) {
+    const rule_type = frm.doc.rule_type;
+    
+    // Show/hide fields based on rule type
+    frm.fields_dict.discount_percentage.$wrapper.toggle(rule_type === 'Discount');
+    frm.fields_dict.fixed_price.$wrapper.toggle(rule_type === 'Fixed Price');
+    frm.fields_dict.price_override.$wrapper.toggle(rule_type === 'Price Override');
+}
+
+function updateDisabledIndicator(frm) {
+    const disabled = frm.doc.disabled;
+    const color = disabled ? 'red' : 'green';
+    
+    frm.fields_dict.rule_name.$wrapper.find('.control-label').css({
+        'color': color
+    });
+}
+
+function loadPerformanceMetrics(frm) {
+    frappe.call({
+        method: 'api.pricing_api.get_rule_performance',
+        args: {
+            rule_name: frm.doc.name
+        },
+        callback: function(r) {
+            if (r.message && r.message.success) {
+                const perf = r.message.performance;
+                
+                // Add performance summary to the form
+                frm.fields_dict.rule_name.$wrapper.find('.help-box').remove();
+                frm.fields_dict.rule_name.$wrapper.append(
+                    '<div class="help-box"><small>' +
+                    'Total Calculations: ' + perf.total_calculations + ' | ' +
+                    'Success Rate: ' + perf.success_rate.toFixed(1) + '% | ' +
+                    'Revenue Impact: ' + perf.revenue_impact.toFixed(2) +
+                    '</small></div>'
+                );
+            }
+        }
+    });
+}
+
+function setupRuleValidation(frm) {
+    // Add custom validation for pricing rules
+    if (frm.doc.rule_type === 'Discount' && frm.doc.discount_percentage > 100) {
+        frappe.msgprint(__('Discount percentage cannot exceed 100%'));
+        frm.set_value('discount_percentage', 100);
+    }
+    
+    if (frm.doc.rule_type === 'Fixed Price' && frm.doc.fixed_price < 0) {
+        frappe.msgprint(__('Fixed price cannot be negative'));
+        frm.set_value('fixed_price', 0);
+    }
+}
+
+function validatePricingRule(frm) {
+    let errors = [];
+    
+    // Validate date range
+    if (frm.doc.valid_from && frm.doc.valid_to && 
+        frm.doc.valid_from >= frm.doc.valid_to) {
+        errors.push(__('Valid From date must be before Valid To date'));
+    }
+    
+    // Validate priority
+    if (frm.doc.priority < 1 || frm.doc.priority > 10) {
+        errors.push(__('Priority must be between 1 and 10'));
+    }
+    
+    if (errors.length > 0) {
+        frappe.throw(errors.join('<br>'));
+    }
 }

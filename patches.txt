@@ -1,0 +1,5 @@
+erpnext_pos_integration.patches.v1_0.create_initial_custom_fields
+erpnext_pos_integration.patches.v1_0.setup_default_pricing_rules
+erpnext_pos_integration.patches.v1_0.create_performance_indexes
+erpnext_pos_integration.patches.v1_0.setup_permissions
+erpnext_pos_integration.patches.v1_0.migrate_existing_data
